@@ -4,6 +4,9 @@ import mongoose from './DB/dbConnection.js'
 import test from './DB/schema/testSchema.js'
 
 
+
+
+
 const app = express()
 app.use(express.json())
 app.use(cors())
@@ -47,12 +50,13 @@ app.get('/time',async(req,res)=>{
 })
 
 
-app.get('/district',async(req,res)=>{
-  // const {state} = req.params
+app.get('/district/:state',async(req,res)=>{
+  const {state} = req.params
   const district= await test.aggregate([{$match: {
-    "properties.STATE/UT":"KERALA",
+    "properties.STATE/UT":state.toString(),
     
-  }},{
+  }},
+  {
     $group: {
       _id: "$properties.DISTRICT",
   
@@ -166,9 +170,10 @@ app.get('/total/:year',async(req,res)=>{
 
 })
 
-app.get('/stacked-bar-chart',async(req,res)=>{
+app.get('/stacked-bar-chart/:state',async(req,res)=>{
+  const {state} = req.params
   const data= await test.aggregate([{$match: {
-    "properties.STATE/UT":"KERALA",
+    "properties.STATE/UT":state.toString(),
     
   }},{
     $group: {
@@ -190,11 +195,13 @@ app.get('/stacked-bar-chart',async(req,res)=>{
 })
 
 
-app.get('/year-graph',async(req,res)=>{
+app.get('/year-graph/:state',async(req,res)=>{
 
+
+const {state} = req.params
 
   const data = await test.aggregate([{$match: {
-    "properties.STATE/UT":"KERALA"
+    "properties.STATE/UT":state.toString()
   }},
    
   {
@@ -209,18 +216,22 @@ app.get('/year-graph',async(req,res)=>{
     $sort: {
       _id:1
   }}])
+  console.log(data);
+  
   res.send(data)
 
 })
 
 
-app.get('/line-graph',async(req,res)=>{
+app.get('/line-graph/:year/:state',async(req,res)=>{
+  const {year} = req.params
+  const {state} =req.params
 
 
   const data = await test.aggregate([{
     $match: {
-      "properties.STATE/UT":"KERALA",
-      "properties.YEAR":2002
+      "properties.STATE/UT":state.toString(),
+      "properties.YEAR":Number(year)
     }
   }
   ,
